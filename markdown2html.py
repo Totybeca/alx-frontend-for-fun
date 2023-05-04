@@ -1,50 +1,92 @@
-#!/usr/bin/python3
-"""
-A script that converts Markdown to HTML.
-"""
+#!/usr/bin/env python3
 
 import sys
 import os
 import re
+import hashlib
 
-def convert_markdown_to_html(input_file, output_file):
-    """
-    Converts a Markdown file to HTML and writes the output to a file.
-    """
-    # Check that the Markdown file exists and is a file
-    if not (os.path.exists(input_file) and os.path.isfile(input_file)):
-        print(f"Missing {input_file}", file=sys.stderr)
-        sys.exit(1)
 
-    # Read the Markdown file and convert it to HTML
-    with open(input_file, encoding="utf-8") as f:
-        html_lines = []
-        for line in f:
-            # Check for Markdown headings
-            match = re.match(r"^(#+) (.*)$", line)
-            if match:
-                heading_level = len(match.group(1))
-                heading_text = match.group(2)
-                html_lines.append(f"<h{heading_level}>{heading_text}</h{heading_level}>")
-            else:
-                html_lines.append(line.rstrip())
+def parse_heading(line):
+    # Regex to match the heading syntax and extract the level and title
+    match = re.match(r'^(#+)\s(.*)$', line)
+    if match:
+        level = len(match.group(1))
+        title = match.group(2)
+        return f'<h{level}>{title}</h{level}>'
+    else:
+        return line
 
-    # Write the HTML output to a file
-    with open(output_file, "w", encoding="utf-8") as f:
-        f.write("\n".join(html_lines))
 
-if __name__ == "__main__":
-    # Check that the correct number of arguments were provided
-    if len(sys.argv) != 3:
-        print("Usage: ./markdown2html.py <input_file> <output_file>", file=sys.stderr)
-        sys.exit(1)
+def parse_unordered_list(lines):
+    # Wrap each item in an <li> tag
+    list_items = [f'<li>{line[2:].strip()}</li>' for line in lines if line.startswith('- ')]
+    # Join the items with line breaks and wrap them in a <ul> tag
+    return '<ul>\n{}\n</ul>'.format('\n'.join(list_items))
 
-    # Get the input and output file names from the command-line arguments
-    input_file = sys.argv[1]
-    output_file = sys.argv[2]
 
-    # Convert the Markdown file to HTML and write the output to a file
-    convert_markdown_to_html(input_file, output_file)
+def parse_ordered_list(lines):
+    # Wrap each item in an <li> tag
+    list_items = [f'<li>{line[2:].strip()}</li>' for line in lines if line.startswith('* ')]
+    # Join the items with line breaks and wrap them in an <ol> tag
+    return '<ol>\n{}\n</ol>'.format('\n'.join(list_items))
 
-    # Exit with a successful status code
-    sys.exit(0)
+
+def parse_paragraph(lines):
+    # Join the lines with line breaks, wrap them in a <p> tag, and replace newlines with <br> tags
+    return '<p>\n{}\n</p>'.format('\n'.join(lines).replace('\n', '<br />\n'))
+
+
+def parse_bold(line):
+    # Replace **text** and __text__ with <b>text</b> and <em>text</em>, respectively
+    line = re.sub(r'\*\*(.*?)\*\*', r'<b>\1</b>', line)
+    line = re.sub(r'__(.*?)__', r'<em>\1</em>', line)
+    return line
+
+
+def parse_md5(line):
+    # Replace [[text]] with the MD5 hash of the lowercase text
+    match = re.match(r'^\[\[(.*)\]\]$', line)
+    if match:
+        text = match.group(1).lower().encode('utf-8')
+        return hashlib.md5(text).hexdigest()
+    else:
+        return line
+
+
+def parse_remove_c(line):
+    # Replace ((text)) with the text with all instances of 'c' (case-insensitive) removed
+    match = re.match(r'^\(\((.*)\)\)$', line)
+    if match:
+        text = match.group(1).replace('c', '').replace('C', '')
+        return text
+    else:
+        return line
+
+
+def parse_markdown(filename):
+    with open(filename) as f:
+        lines = f.readlines()
+
+    # Split the lines into blocks separated by empty lines
+    blocks = [[]]
+    for line in lines:
+        if line.strip():
+            blocks[-1].append(line)
+        else:
+            blocks.append([])
+
+    # Parse each block based on its syntax
+    output = []
+    for block in blocks:
+        if block[0].startswith('#'):
+            # Heading syntax
+            output.append(parse_heading(block[0]))
+        elif any(line.startswith('- ') for line in block):
+            # Unordered list syntax
+            output.append(parse_unordered_list(block))
+        elif any(line.startswith('* ') for line in block):
+            # Ordered list syntax
+            output.append(parse_ordered_list(block))
+        elif any(line.startswith(('**', '__')) for line in block):
+            # Bold syntax
+            output.append(parse
