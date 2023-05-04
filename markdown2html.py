@@ -1,24 +1,31 @@
 #!/usr/bin/python3
+"""
+This module provide a functionfor converting
+a Markdown file to HTML.
+"""
+
 import sys
 import markdown
 
-if len(sys.argv) < 3:
-    sys.stderr.write("Usage: ./markdown2html.py <input_file> <output_file>\n")
-    sys.exit(1)
+def markdown2html(input_file: str, output_file: str):
+    """
+    Convert the input Markdown file to HTML and save
+    it to the output file.
 
-input_file = sys.argv[1]
-output_file = sys.argv[2]
+    :param input_file: path to the Markdown file
+    :param out_file: path to the HTML file
+    """
+    try:
+        with open(input_file, 'r') as md_file:
+            html = markdown.markdown(mk_file.read())
+            with open(output_file, 'w') as html_file:
+                html_file.write(html)
+    except FileNotFoundError:
+        print(f"Missing (input_file)", file=sys.stderr)
+        sys.exit(1)
 
-try:
-    with open(input_file, "r") as f:
-        markdown_text = f.read()
-except FileNotFoundError:
-    sys.stderr.write(f"Missing {input_file}\n")
-    sys.exit(1)
-
-html_text = markdown.markdown(markdown_text)
-
-with open(output_file, "w") as f:
-    f.write(html_text)
-
-sys.exit(0)
+if __name__ == '__main__':
+    if len(sys.argv) < 3:
+        print(f"Usage: {sys.argv[0]} <input_file> <out_file>", file=sys.stderr)
+        sys.exit(1)
+    markdown2html(sys.argv[1], sys.argv[2])
