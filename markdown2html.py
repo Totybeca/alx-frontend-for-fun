@@ -1,92 +1,43 @@
-#!/usr/bin/env python3
-
+#!/usr/bin/python3
+'''
+This script codes the markdown to HTML
+'''
 import sys
 import os
 import re
-import hashlib
 
+if __name__ == '__main__':
 
-def parse_heading(line):
-    # Regex to match the heading syntax and extract the level and title
-    match = re.match(r'^(#+)\s(.*)$', line)
-    if match:
-        level = len(match.group(1))
-        title = match.group(2)
-        return f'<h{level}>{title}</h{level}>'
-    else:
-        return line
+    # Test if the number of arguments passed is 2
+    if len(sys.argv[1:]) != 2:
+        print('Usage: ./markdown2html.py README.md README.html',
+              file=sys.stderr)
+        sys.exit(1)
 
+    # Store the arguments into variables
+    input_file = sys.argv[1]
+    output_file = sys.argv[2]
 
-def parse_unordered_list(lines):
-    # Wrap each item in an <li> tag
-    list_items = [f'<li>{line[2:].strip()}</li>' for line in lines if line.startswith('- ')]
-    # Join the items with line breaks and wrap them in a <ul> tag
-    return '<ul>\n{}\n</ul>'.format('\n'.join(list_items))
+    # Check that the markdown file exist and it is a file
+    if not (os.path.exists(input_file) and os.path.isfile(input_file)):
+        print(f'Missing {input_file}', file=sys.stderr)
+        sys.exit(1)
 
+    with open(input_file, encoding='utf-8') as file_1:
+        html_content = []
+        md_content = [line[:-1] for line in file_1.readlines()]
+        for line in md_content:
+            heading = re.split(r'#{1,6} ', line)
+            if len(heading) > 1:
+                # Compute the number of the # present to
+                # determine heading level
+                h_level = len(line[:line.find(heading[1])-1])
+                # Append the html equivalent of the heading
+                html_content.append(
+                    f'<h{h_level}>{heading[1]}</h{h_level}>\n'
+                )
+            else:
+                html_content.append(line)
 
-def parse_ordered_list(lines):
-    # Wrap each item in an <li> tag
-    list_items = [f'<li>{line[2:].strip()}</li>' for line in lines if line.startswith('* ')]
-    # Join the items with line breaks and wrap them in an <ol> tag
-    return '<ol>\n{}\n</ol>'.format('\n'.join(list_items))
-
-
-def parse_paragraph(lines):
-    # Join the lines with line breaks, wrap them in a <p> tag, and replace newlines with <br> tags
-    return '<p>\n{}\n</p>'.format('\n'.join(lines).replace('\n', '<br />\n'))
-
-
-def parse_bold(line):
-    # Replace **text** and __text__ with <b>text</b> and <em>text</em>, respectively
-    line = re.sub(r'\*\*(.*?)\*\*', r'<b>\1</b>', line)
-    line = re.sub(r'__(.*?)__', r'<em>\1</em>', line)
-    return line
-
-
-def parse_md5(line):
-    # Replace [[text]] with the MD5 hash of the lowercase text
-    match = re.match(r'^\[\[(.*)\]\]$', line)
-    if match:
-        text = match.group(1).lower().encode('utf-8')
-        return hashlib.md5(text).hexdigest()
-    else:
-        return line
-
-
-def parse_remove_c(line):
-    # Replace ((text)) with the text with all instances of 'c' (case-insensitive) removed
-    match = re.match(r'^\(\((.*)\)\)$', line)
-    if match:
-        text = match.group(1).replace('c', '').replace('C', '')
-        return text
-    else:
-        return line
-
-
-def parse_markdown(filename):
-    with open(filename) as f:
-        lines = f.readlines()
-
-    # Split the lines into blocks separated by empty lines
-    blocks = [[]]
-    for line in lines:
-        if line.strip():
-            blocks[-1].append(line)
-        else:
-            blocks.append([])
-
-    # Parse each block based on its syntax
-    output = []
-    for block in blocks:
-        if block[0].startswith('#'):
-            # Heading syntax
-            output.append(parse_heading(block[0]))
-        elif any(line.startswith('- ') for line in block):
-            # Unordered list syntax
-            output.append(parse_unordered_list(block))
-        elif any(line.startswith('* ') for line in block):
-            # Ordered list syntax
-            output.append(parse_ordered_list(block))
-        elif any(line.startswith(('**', '__')) for line in block):
-            # Bold syntax
-            output.append(parse
+    with open(output_file, 'w', encoding='utf-8') as file_2:
+        file_2.writelines(html_content)
