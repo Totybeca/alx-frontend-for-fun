@@ -23,7 +23,7 @@ if __name__ == '__main__':
         print(f'Missing {input_file}', file=sys.stderr)
         sys.exit(1)
 
-    
+    ulmain = ''    
 
     readfile = open(input_file, 'r')
     writefile = open(output_file, 'w')
@@ -31,9 +31,18 @@ if __name__ == '__main__':
 
     for line in Lines:
         ct = line.count('#')
-        line = line.replace('#', '')
-        line = line.strip()
-        writefile.write(f'<h{ct}>{line}</h{ct}>\n')
+        if ct:
+            line = line.replace('#', '')
+            line = line.strip()
+            writefile.write(f'<h{ct}>{line}</h{ct}>\n')
+
+        if(line.find('-') >= 0):
+            line = line.replace('-', '')
+            line = line.strip()
+            ulmain += f'<li>{line}</li>\n'
+
+    if ulmain:
+         writefile.write(f'<ul>\n{ulmain}</ul>')
 
     readfile.close()
     writefile.close()
