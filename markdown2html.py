@@ -26,8 +26,8 @@ if __name__ == '__main__':
     ulvli = ''
     olvli = ''    
 
-    readfile = open(inputvfile, 'r')
-    writefile = open(outputvfile, 'w')
+    readfile = open(input_file, 'r')
+    writefile = open(output_file, 'w')
     Lines = readfile.readlines()
 
     for line in Lines:
@@ -37,8 +37,8 @@ if __name__ == '__main__':
             line = line.strip()
             writefile.write(f'<h{ct}>{line}</h{ct}>\n')
 
-        if(line.find('v') >= 0):
-            line = line.replace('v', '')
+        if(line.find('-') >= 0):
+            line = line.replace('-', '')
             line = line.strip()
             ulvli += f'<li>{line}</li>\n'
         
