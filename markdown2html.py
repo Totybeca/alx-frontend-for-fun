@@ -23,27 +23,8 @@ if __name__ == '__main__':
         print(f'Missing {input_file}', file=sys.stderr)
         sys.exit(1)
 
-<<<<<<< HEAD
-    with open(input_file, encoding='utf-8') as file_1:
-        html_content = []
-        md_content = [line[:-1] for line in file_1.readlines()]
-        for line in md_content:
-            heading = re.split(r'#{1,6} ', line)
-            if len(heading) > 1:
-                # Compute the number of the # present to
-                # determine heading level
-                h_level = len(line[:line.find(heading[1])-1])
-                # Append the html equivalent of the heading
-                html_content.append(
-                    f'<h{h_level}>{heading[1]}</h{h_level}>\n'
-                )
-            else:
-                html_content.append(line)
-
-    with open(output_file, 'w', encoding='utf-8') as file_2:
-        file_2.writelines(html_content)
-=======
-    ulmain = ''    
+    ul_li = ''
+    ol_li = ''    
 
     readfile = open(input_file, 'r')
     writefile = open(output_file, 'w')
@@ -59,11 +40,17 @@ if __name__ == '__main__':
         if(line.find('-') >= 0):
             line = line.replace('-', '')
             line = line.strip()
-            ulmain += f'<li>{line}</li>\n'
+            ul_li += f'<li>{line}</li>\n'
+        
+        if(line.find('*') >= 0):
+            line = line.replace('*', '')
+            line = line.strip()
+            ol_li += f'<li>{line}</li>\n'
 
-    if ulmain:
-         writefile.write(f'<ul>\n{ulmain}</ul>')
+    if ul_li:
+         writefile.write(f'<ul>\n{ul_li}</ul>')
+    if ul_li:
+         writefile.write(f'<ul>\n{ul_li}</ul>')
 
     readfile.close()
     writefile.close()
->>>>>>> 13340937ef03651f80325d8c9f51997119940dad
