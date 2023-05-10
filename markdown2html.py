@@ -23,6 +23,7 @@ if __name__ == '__main__':
         print(f'Missing {input_file}', file=sys.stderr)
         sys.exit(1)
 
+<<<<<<< HEAD
     with open(input_file, encoding='utf-8') as file_1:
         html_content = []
         md_content = [line[:-1] for line in file_1.readlines()]
@@ -41,3 +42,28 @@ if __name__ == '__main__':
 
     with open(output_file, 'w', encoding='utf-8') as file_2:
         file_2.writelines(html_content)
+=======
+    ulmain = ''    
+
+    readfile = open(input_file, 'r')
+    writefile = open(output_file, 'w')
+    Lines = readfile.readlines()
+
+    for line in Lines:
+        ct = line.count('#')
+        if ct:
+            line = line.replace('#', '')
+            line = line.strip()
+            writefile.write(f'<h{ct}>{line}</h{ct}>\n')
+
+        if(line.find('-') >= 0):
+            line = line.replace('-', '')
+            line = line.strip()
+            ulmain += f'<li>{line}</li>\n'
+
+    if ulmain:
+         writefile.write(f'<ul>\n{ulmain}</ul>')
+
+    readfile.close()
+    writefile.close()
+>>>>>>> 13340937ef03651f80325d8c9f51997119940dad
