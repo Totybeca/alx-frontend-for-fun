@@ -23,8 +23,7 @@ if __name__ == '__main__':
         print(f'Missing {input_file}', file=sys.stderr)
         sys.exit(1)
 
-    ul_li = ''
-    ol_li = ''    
+    ul_li = '' 
 
     readfile = open(input_file, 'r')
     writefile = open(output_file, 'w')
@@ -41,14 +40,7 @@ if __name__ == '__main__':
             line = line.replace('-', '')
             line = line.strip()
             ul_li += f'<li>{line}</li>\n'
-        
-        if(line.find('*') >= 0):
-            line = line.replace('*', '')
-            line = line.strip()
-            ol_li += f'<li>{line}</li>\n'
 
-    if ul_li:
-         writefile.write(f'<ul>\n{ul_li}</ul>')
     if ul_li:
          writefile.write(f'<ul>\n{ul_li}</ul>')
 
